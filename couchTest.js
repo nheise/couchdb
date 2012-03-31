@@ -4,8 +4,8 @@ var connection = couch.connection();
 
 var resHandler = {
 
-   data : function( data, res ) {
-      console.log( 'Data: ' + JSON.stringify( data ) );
+   data : function( object, res ) {
+      console.log( 'Data: ' + JSON.stringify( object ) );
    }
 
 };
@@ -15,8 +15,8 @@ connection.GET( '/', resHandler );
 var db = connection.db( 'test' );
 
 db.GET( resHandler );
-db.PUT( resHandler );
-db.GET( resHandler );
+//db.PUT( resHandler );
+//db.GET( resHandler );
 
 var doc = db.doc( 'testDoc' );
 

@@ -4,11 +4,12 @@ exports.connection = function( options ) {
    return new Connection( options );
 }
 
-function Connection( options ) {
+function Connection( host, port ) {
 
    var self = this;
 
-   init();
+   this.host = host || '127.0.0.1';
+   this.port = port || 5984;
 
    this.db = function( id ) {
       return new Database( id, self );
@@ -24,17 +25,6 @@ function Connection( options ) {
          port: self.port,
          path: self.uri,
          method: method
-      }
-   }
-
-   function init() {
-      if( options ) {
-         self.host = options.host;
-         self.port = options.port;
-      }
-      else {
-         self.host = '127.0.0.1';
-         self.port = 5984;
       }
    }
 }
@@ -78,7 +68,7 @@ function Document( id, database ) {
    this.uri = this.database.uri + '/' + id || "/";
 
    this.PUT = function( data, resHandler ) {
-      request( options( 'PUT' ), resHandler, data );
+      dataRequest( options( 'PUT' ), resHandler, data );
    }
 
    function options( method, headers ) {
@@ -92,16 +82,24 @@ function Document( id, database ) {
    }
 }
 
-function request( options, resHandler, data ) {
+function request( options, resHandler ) {
+   http.get( options, function( res ) {
+      res.on( 'data', function( chunk ) {
+         resHandler.data( JSON.parse( chunk ), res );
+      });
+   }).on( 'error', function( error ) {
+      resHandler.error( error );
+   });
+}
 
-   var jsonData;
-   if( data ) {
-      jsonData = JSON.stringify( data );
-      options['headers'] = {
-         'Content-Length': jsonData.length,
-         'Content-Type': 'application/json'
-      };
-   }
+
+function dataRequest( options, resHandler, object ) {
+
+   var jsonObject = JSON.stringify( object );
+   options['headers'] = {
+      'Content-Length': jsonObject.length,
+      'Content-Type': 'application/json'
+   };
 
    var request = http.request( options , function( res ) {
       res.on('data', function( chunk ){
@@ -113,9 +111,7 @@ function request( options, resHandler, data ) {
       resHandler.error( error );
    });
 
-   if( jsonData ) {
-      request.write( jsonData );
-   }
+   request.write( jsonObject );
 
    request.end();
 }
