@@ -71,6 +71,10 @@ function Document( id, database ) {
       dataRequest( options( 'PUT' ), resHandler, data );
    }
 
+   this.GET = function( resHandler ) {
+      request( options( 'GET' ), resHandler );
+   }
+
    function options( method, headers ) {
       return {
          host: self.database.connection.host,

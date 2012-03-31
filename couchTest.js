@@ -21,3 +21,4 @@ db.GET( resHandler );
 var doc = db.doc( 'testDoc' );
 
 doc.PUT( { 'testKey':'testValue' }, resHandler );
+doc.GET( resHandler );
